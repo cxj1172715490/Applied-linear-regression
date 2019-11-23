@@ -1,0 +1,39 @@
+x1 <- c(25,20,6,1001,525,825,120,28,7,532,75,40,187,122,74)
+x2 <- c(3547.79,896.34,750.32,2087.05,1639.31,3357.70,808.47,520.27,
+        671.13,2863.32,1160.00,862.75,672.99,901.76,3546.18)
+y <- c(553.96,208.55,3.10,2815.40,1052.12,3427.00,442.82,70.12,122.24,
+       1400.00,464.00,7.50,224.18,538.94,2442.79)
+
+#不用R内置函数计算
+eg4.6 <- data.frame(x1,x2,y)
+lm.eg <- lm(y~x1+x2)
+summary(lm.eg)
+y.fit <- predict(lm.eg)
+x3=c(rep(1,15))
+p=2;n <- length(x1)
+X <- as.matrix(cbind(x3,x1,x2))
+y <- as.matrix(y)
+H <- X%*%solve(t(X)%*%X)%*%t(X);H  #计算帽子矩阵
+hii <- diag(H);hii
+bhat <- solve(t(X)%*%X)%*%t(X)%*%y ;bhat
+res.hat <- y-X%*%bhat ;res.hat  #残差向量
+s.hat <- t(res.hat)%*%res.hat/(length(x1)-p-1);s.hat #sigma方的估计
+ei <- y-y.fit;ei  #计算普通残差
+SREi <- ei/sqrt(s.hat*(1-hii));SREi #计算学生化残差
+ej <- ei/(1-hii);ej #删除残差值
+SREj <- y.rst*sqrt((n-p-1)/(n-p-1-y.rst^2));SREj #计算删除学生化残差
+chii <- hii-1/n;chii #计算中心化杠杆值
+Di <- (hii*ei^2)/((p+1)*s.hat*(1-hii)^2);Di #计算cook距离
+data4.6 <- data.frame(x1,x2,y,ei,SREi,ej,SREj,chii,Di);data4.6
+
+
+
+#使用R内置函数计算
+y.res <- residuals(lm.eg)#普通残差
+y.rst <- rstandard(lm.eg)#学生化残差
+y.rst1 <- rstudent(lm.eg)#删除学生化残差
+cook <- cooks.distance(lm.eg) #cook距离
+hat <- hatvalues(lm.eg)#帽子矩阵主对角元素值
+chat <- hat-1/length(x1)#中心化杠杆值
+covratio(lm.eg)
+data4.6 <- data.frame(x1,x2,y,y.res,y.rst,y.rst1,chat,cook);data4.6
